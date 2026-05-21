@@ -3,7 +3,10 @@
 <head>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1a3a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>Joseph Gray — Software Developer</title>
 <style>
   /* ---------- Base ---------- */
@@ -439,17 +442,165 @@
 
   /* ---------- Mobile ---------- */
   @media (max-width: 768px) {
-    .menu-row { flex-direction: column; gap: 16px; align-items: center; }
-    .icon { width: 80px; height: 80px; }
-    .icon svg { width: 40px; height: 40px; }
-    .submenu { position: static; transform: none; margin-top: 12px; align-items: center; }
-    .menu-item.active .icon { transform: scale(1.05); }
-    .modal { padding: 28px; }
-    .modal h2 { font-size: 22px; }
+    /* Move icon row up to the top third so submenu has dedicated space below */
+    .menu {
+      width: 100%;
+      left: 0;
+      top: 26%;
+      transform: translateY(-50%);
+      padding: 0 20px;
+    }
+
+    .menu-row {
+      gap: 18px;
+      justify-content: flex-start;
+      overflow-x: auto;
+      overflow-y: visible;
+      scroll-snap-type: x mandatory;
+      scroll-padding: 0 50%;
+      padding: 80px 50% 20px;
+      margin: -80px -20px 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .menu-row::-webkit-scrollbar { display: none; }
+
+    .menu-item {
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+
+    .icon {
+      width: 84px;
+      height: 84px;
+      border-radius: 6px;
+    }
+    .icon svg { width: 42px; height: 42px; }
+
+    .menu-item .label {
+      font-size: 12px;
+      margin-top: 14px;
+      letter-spacing: 0.16em;
+    }
+
+    .menu-item.active .icon {
+      transform: translateY(-6px) scale(1.12);
+    }
+
+    /* Submenu sits in its own zone in the lower-middle of screen */
+    .submenu {
+      position: fixed;
+      top: 100%;
+      bottom: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 0;
+      width: calc(100% - 40px);
+      max-width: 320px;
+      align-items: stretch;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sub-item {
+      padding: 14px 20px;
+      font-size: 12px;
+      text-align: center;
+      background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      border-left: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      min-height: 44px; /* touch-friendly target */
+    }
+    .sub-item:hover, .sub-item:active {
+      padding-left: 20px; /* override desktop hover slide */
+      background: linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08));
+      border-color: rgba(255,255,255,0.6);
+    }
+
+    /* Top bar */
+    .topbar {
+      padding: 14px 18px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+    }
+
+    /* Replace keyboard hint with touch hint */
+    .hint-bar {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      bottom: 16px;
+    }
+    .hint-bar .desktop-hint { display: none; }
+    .hint-bar .mobile-hint { display: inline; }
+
+    /* Modal — full-screen sheet feel on phones */
+    .modal-backdrop {
+      padding: 0;
+      align-items: flex-end;
+    }
+    .modal {
+      max-width: 100%;
+      max-height: 92vh;
+      padding: 32px 24px 40px;
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-backdrop.open .modal {
+      transform: translateY(0);
+    }
+    .modal h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      padding-right: 36px; /* clear the close button */
+    }
+    .modal p, .modal li { font-size: 14px; line-height: 1.65; }
+    .modal::before {
+      /* little grab handle to suggest it's a sheet */
+      content: "";
+      position: sticky;
+      top: -16px;
+      display: block;
+      width: 40px;
+      height: 4px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 2px;
+      margin: -20px auto 16px;
+    }
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+    }
+
     .contact-grid { grid-template-columns: 1fr; gap: 4px 0; }
     .contact-grid .key { padding-top: 12px; }
-    .topbar { padding: 16px 20px; font-size: 11px; }
+
+    /* Tone down background motion on mobile for battery */
+    .ribbon { filter: blur(8px); }
   }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    .icon { width: 74px; height: 74px; }
+    .icon svg { width: 36px; height: 36px; }
+    .menu-item .label { font-size: 11px; }
+  }
+
+  /* Short screens (landscape phones) */
+  @media (max-width: 768px) and (max-height: 600px) {
+    .menu { top: 22%; }
+    .submenu { top: 48%; }
+    .icon { width: 70px; height: 70px; }
+    .icon svg { width: 36px; height: 36px; }
+    .menu-item .label { margin-top: 10px; font-size: 11px; }
+  }
+
+  /* Default: assume mouse, show keyboard hint */
+  .hint-bar .mobile-hint { display: none; }
 </style>
 </head>
 <body>
@@ -526,7 +677,8 @@
 
 <!-- Hint bar -->
 <div class="hint-bar">
-  Use <kbd>←</kbd> <kbd>→</kbd> to navigate · <kbd>Enter</kbd> to select · <kbd>Esc</kbd> to close
+  <span class="desktop-hint">Use <kbd>←</kbd> <kbd>→</kbd> to navigate · <kbd>Enter</kbd> to select · <kbd>Esc</kbd> to close</span>
+  <span class="mobile-hint">Swipe to navigate · Tap to select</span>
 </div>
 
 <!-- Modal -->
@@ -545,7 +697,7 @@
       html: `
         <p>Hi — I'm <strong>Joseph Gray</strong>, a software developer based in Florence, Alabama. I build internal tools, integrations, and platforms that help real teams get their work done.</p>
         <p>Currently at Bank Independent, I work across the stack — Node.js dashboards, C#/.NET platforms, Python automation, SQL reporting — usually focused on turning a messy manual process into something dependable and easy to use.</p>
-        <p>Outside of work I'm usually playing video games, watching anime, fishing, or spending time with my wife.</p>
+        <p>I like work that ships, code that holds up, and the occasional retro game. (Hence the menu.)</p>
       `
     },
     'about-education': {
@@ -644,28 +796,52 @@
       title: 'Socials',
       html: `
         <div class="contact-grid">
-          <div class="key">GitHub</div><div><a href="https://github.com/jgray7-dev" target="_blank" rel="noopener">github.com/jgray7-dev</a></div>
-          <div class="key">LinkedIn</div><div><a href="https://linkedin.com/in/joseph-gray-361964276" target="_blank" rel="noopener">linkedin.com/in/joseph-gray-361964276</a></div>
+          <div class="key">GitHub</div><div><a href="https://github.com/yourhandle" target="_blank" rel="noopener">github.com/yourhandle</a></div>
+          <div class="key">LinkedIn</div><div><a href="https://linkedin.com/in/yourhandle" target="_blank" rel="noopener">linkedin.com/in/yourhandle</a></div>
         </div>
+        <p style="margin-top:18px;color:var(--text-dim);font-size:13px;"><em>Update these links in index.html — search for "yourhandle".</em></p>
       `
     }
   };
 
   /* ---------- Menu navigation ---------- */
   const items = Array.from(document.querySelectorAll('.menu-item'));
-  let active = 1; // start on Resume — middle item, employer-facing focus
+  const menuRow = document.querySelector('.menu-row');
+  const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+  let active = 1; // start on Resume — middle-ish item, employer-facing focus
 
-  function setActive(idx) {
+  function setActive(idx, scroll = true) {
     active = (idx + items.length) % items.length;
     items.forEach((el, i) => el.classList.toggle('active', i === active));
+    if (scroll && isMobile()) {
+      items[active].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
   }
 
   items.forEach((el, i) => {
-    el.addEventListener('mouseenter', () => setActive(i));
+    el.addEventListener('mouseenter', () => { if (!isMobile()) setActive(i, false); });
     el.addEventListener('click', (e) => {
       if (e.target.closest('.sub-item')) return;
       setActive(i);
     });
+  });
+
+  // On mobile, update active state as user scrolls/swipes the menu row
+  let scrollTimer;
+  menuRow.addEventListener('scroll', () => {
+    if (!isMobile()) return;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const rowRect = menuRow.getBoundingClientRect();
+      const center = rowRect.left + rowRect.width / 2;
+      let closest = 0, closestDist = Infinity;
+      items.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        const dist = Math.abs((r.left + r.width / 2) - center);
+        if (dist < closestDist) { closestDist = dist; closest = i; }
+      });
+      if (closest !== active) setActive(closest, false);
+    }, 80);
   });
 
   document.addEventListener('keydown', (e) => {
@@ -690,8 +866,12 @@
     if (!data) return;
     modalContent.innerHTML = `<h2>${data.title}</h2>${data.html}`;
     backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
-  function closeModal() { backdrop.classList.remove('open'); }
+  function closeModal() {
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
   document.querySelectorAll('.sub-item').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -734,6 +914,12 @@
   /* ---------- Boot ---------- */
   window.addEventListener('load', () => {
     setActive(active); // initialize
+    // On mobile, snap to active item after layout settles
+    if (isMobile()) {
+      requestAnimationFrame(() => {
+        items[active].scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+      });
+    }
     setTimeout(() => document.getElementById('boot').classList.add('done'), 200);
   });
 </script>
