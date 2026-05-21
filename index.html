@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0a1a3a" />
@@ -500,12 +500,13 @@
       display: none;
     }
 
-    /* Portal: a dedicated, always-visible spot below the icon row for submenu links */
+    /* Portal: a dedicated spot below the icon row for submenu links.
+       Top position is set dynamically in JS based on where the icon row actually rendered —
+       this avoids Safari's quirks with dvh + scroll-snap containers. */
     .submenu-portal {
       display: flex;
       position: fixed;
-      top: 50%;
-      top: 50dvh;
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 40px);
@@ -862,6 +863,17 @@
   const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
   let active = 1; // start on Resume — middle-ish item, employer-facing focus
 
+  function positionPortal() {
+    if (!isMobile()) return;
+    // Anchor the portal a fixed distance below wherever the active icon actually rendered.
+    // This avoids Safari quirks with viewport units inside scroll-snap containers.
+    const activeItem = items[active];
+    if (!activeItem) return;
+    const rect = activeItem.getBoundingClientRect();
+    const top = rect.bottom + 32; // 32px gap below the active icon's label
+    portal.style.top = top + 'px';
+  }
+
   function populatePortal(idx) {
     // Clone the active item's submenu links into the portal so they render
     // outside the scrollable menu-row (where they'd otherwise be clipped/hidden)
@@ -880,6 +892,7 @@
       });
       portal.appendChild(clone);
     });
+    positionPortal();
     portal.classList.add('visible');
   }
 
@@ -908,6 +921,7 @@
   let scrollTimer;
   menuRow.addEventListener('scroll', () => {
     if (!isMobile()) return;
+    positionPortal(); // keep portal pinned below active icon during scroll
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
       const rowRect = menuRow.getBoundingClientRect();
@@ -1001,12 +1015,17 @@
     setTimeout(() => document.getElementById('boot').classList.add('done'), 200);
   });
 
-  // Handle viewport changes (rotate phone, resize browser)
+  // Handle viewport changes (rotate phone, resize browser, Safari toolbar show/hide)
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => setActive(active, false), 150);
+    resizeTimer = setTimeout(() => {
+      setActive(active, false);
+      positionPortal();
+    }, 150);
   });
+  // Safari fires this when the address bar hides/shows during scroll
+  window.addEventListener('scroll', () => positionPortal(), { passive: true });
 </script>
 </body>
 </html>
