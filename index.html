@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Joseph Gray — Software Developer</title>
+<style>
+  /* ---------- Base ---------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-top: #0a1a3a;
+    --bg-mid: #1656b8;
+    --bg-bot: #051028;
+    --ribbon: rgba(180, 220, 255, 0.18);
+    --ribbon-bright: rgba(220, 240, 255, 0.32);
+    --text: #eaf3ff;
+    --text-dim: #a8c4e8;
+    --accent: #ffffff;
+    --glow: 0 0 18px rgba(180, 220, 255, 0.55);
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    color: var(--text);
+    font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    user-select: none;
+  }
+
+  /* ---------- Background layers ---------- */
+  .bg {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 30%, var(--bg-mid) 0%, var(--bg-top) 45%, var(--bg-bot) 100%);
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .bg::before {
+    /* subtle vignette */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+  }
+
+  /* Flowing translucent ribbons (the iconic PS2 wave) */
+  .ribbon {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    height: 200px;
+    background: linear-gradient(180deg, transparent 0%, var(--ribbon) 45%, var(--ribbon-bright) 50%, var(--ribbon) 55%, transparent 100%);
+    filter: blur(6px);
+    transform-origin: center;
+    animation: flow 18s ease-in-out infinite;
+    opacity: 0.85;
+  }
+
+  .ribbon:nth-child(1) { top: 18%; animation-duration: 22s; animation-delay: 0s; }
+  .ribbon:nth-child(2) { top: 38%; animation-duration: 28s; animation-delay: -6s; opacity: 0.6; }
+  .ribbon:nth-child(3) { top: 58%; animation-duration: 24s; animation-delay: -12s; opacity: 0.7; }
+  .ribbon:nth-child(4) { top: 72%; animation-duration: 32s; animation-delay: -3s; opacity: 0.5; }
+
+  @keyframes flow {
+    0%   { transform: translateX(-5%) translateY(0) rotate(-2deg) scaleY(1); }
+    25%  { transform: translateX(2%) translateY(-15px) rotate(1deg) scaleY(1.15); }
+    50%  { transform: translateX(5%) translateY(10px) rotate(-1deg) scaleY(0.9); }
+    75%  { transform: translateX(-2%) translateY(-8px) rotate(2deg) scaleY(1.1); }
+    100% { transform: translateX(-5%) translateY(0) rotate(-2deg) scaleY(1); }
+  }
+
+  /* Floating particles for atmosphere */
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+    animation: rise linear infinite;
+  }
+
+  @keyframes rise {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+  }
+
+  /* ---------- Top header bar ---------- */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .topbar .brand { color: var(--text); font-weight: 400; }
+  .topbar .clock { font-variant-numeric: tabular-nums; }
+
+  /* ---------- Menu container ---------- */
+  .menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+  }
+
+  .menu-row {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .icon {
+    width: 110px;
+    height: 110px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .icon::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .icon svg {
+    width: 56px;
+    height: 56px;
+    stroke: var(--text);
+    fill: none;
+    stroke-width: 1.2;
+    transition: all 0.4s ease;
+  }
+
+  .menu-item .label {
+    margin-top: 18px;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: all 0.4s ease;
+    opacity: 0.7;
+  }
+
+  /* Active state — the PS2 "selected" feel */
+  .menu-item.active .icon {
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(180, 220, 255, 0.15));
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 40px rgba(180, 220, 255, 0.6), 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.5);
+    transform: translateY(-8px) scale(1.08);
+  }
+
+  .menu-item.active .icon svg {
+    stroke: #fff;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
+  }
+
+  .menu-item.active .label {
+    color: var(--text);
+    opacity: 1;
+    text-shadow: var(--glow);
+    transform: translateY(-4px);
+    font-weight: 400;
+  }
+
+  /* ---------- Submenu (vertical, PS2-style reveal) ---------- */
+  .submenu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    min-width: 220px;
+  }
+
+  .menu-item.active .submenu {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sub-item {
+    padding: 10px 18px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent);
+    border-left: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: block;
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: subSlide 0.4s forwards;
+  }
+
+  .menu-item.active .sub-item:nth-child(1) { animation-delay: 0.1s; }
+  .menu-item.active .sub-item:nth-child(2) { animation-delay: 0.18s; }
+  .menu-item.active .sub-item:nth-child(3) { animation-delay: 0.26s; }
+  .menu-item.active .sub-item:nth-child(4) { animation-delay: 0.34s; }
+
+  @keyframes subSlide {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .sub-item:hover {
+    background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.02));
+    border-left-color: #fff;
+    color: #fff;
+    padding-left: 24px;
+  }
+
+  /* ---------- Modal panel ---------- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 16, 40, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    max-width: 720px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(20, 50, 110, 0.85), rgba(8, 20, 50, 0.9));
+    border: 1px solid rgba(180, 220, 255, 0.3);
+    border-radius: 8px;
+    padding: 48px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+    transform: scale(0.95) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .modal-backdrop.open .modal {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal h2 {
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    color: #fff;
+    text-shadow: var(--glow);
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 16px;
+  }
+
+  .modal p, .modal li {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .modal ul { list-style: none; padding-left: 0; }
+  .modal ul li::before { content: "▸ "; color: var(--text-dim); margin-right: 8px; }
+
+  .modal a {
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.4);
+    transition: all 0.2s ease;
+    padding-bottom: 1px;
+  }
+  .modal a:hover {
+    border-bottom-color: #fff;
+    text-shadow: var(--glow);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px 24px;
+    margin-top: 8px;
+  }
+  .contact-grid .key {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    padding-top: 2px;
+  }
+
+  .resume-action {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(180,220,255,0.1));
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 13px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  .resume-action:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(180,220,255,0.2));
+    box-shadow: 0 0 24px rgba(180,220,255,0.5);
+    transform: translateY(-2px);
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 16px;
+    transition: all 0.2s ease;
+  }
+  .close-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: #fff;
+  }
+
+  /* ---------- Footer hint bar ---------- */
+  .hint-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    z-index: 10;
+    opacity: 0.6;
+  }
+  .hint-bar kbd {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin: 0 4px;
+    font-family: inherit;
+    font-size: 10px;
+  }
+
+  /* ---------- Boot overlay ---------- */
+  .boot {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease 0.6s;
+  }
+  .boot.done {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .boot-glow {
+    width: 4px;
+    height: 4px;
+    background: #4aa3ff;
+    border-radius: 50%;
+    box-shadow: 0 0 40px 8px #4aa3ff, 0 0 80px 20px rgba(74,163,255,0.4);
+    animation: bootPulse 1.4s ease-out forwards;
+  }
+  @keyframes bootPulse {
+    0% { transform: scale(0); opacity: 0; }
+    40% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(60); opacity: 0; }
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 768px) {
+    .menu-row { flex-direction: column; gap: 16px; align-items: center; }
+    .icon { width: 80px; height: 80px; }
+    .icon svg { width: 40px; height: 40px; }
+    .submenu { position: static; transform: none; margin-top: 12px; align-items: center; }
+    .menu-item.active .icon { transform: scale(1.05); }
+    .modal { padding: 28px; }
+    .modal h2 { font-size: 22px; }
+    .contact-grid { grid-template-columns: 1fr; gap: 4px 0; }
+    .contact-grid .key { padding-top: 12px; }
+    .topbar { padding: 16px 20px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Boot flash -->
+<div class="boot" id="boot"><div class="boot-glow"></div></div>
+
+<!-- Background -->
+<div class="bg">
+  <div class="ribbon"></div>
+  <div class="ribbon"></div>
+  <div class="ribbon"></div>
+  <div class="ribbon"></div>
+</div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="brand">JOSEPH GRAY</div>
+  <div class="clock" id="clock">--:--</div>
+</div>
+
+<!-- Main menu -->
+<nav class="menu" id="menu">
+  <div class="menu-row">
+
+    <div class="menu-item" data-id="about">
+      <div class="icon">
+        <svg viewBox="0 0 64 64"><circle cx="32" cy="22" r="10"/><path d="M14 54c0-10 8-18 18-18s18 8 18 18"/></svg>
+      </div>
+      <div class="label">About</div>
+      <div class="submenu">
+        <a class="sub-item" data-action="open" data-target="about-bio">Bio</a>
+        <a class="sub-item" data-action="open" data-target="about-education">Education</a>
+        <a class="sub-item" data-action="open" data-target="about-honors">Honors</a>
+      </div>
+    </div>
+
+    <div class="menu-item" data-id="resume">
+      <div class="icon">
+        <svg viewBox="0 0 64 64"><path d="M16 8h24l12 12v36H16z"/><path d="M40 8v12h12"/><line x1="22" y1="32" x2="46" y2="32"/><line x1="22" y1="40" x2="46" y2="40"/><line x1="22" y1="48" x2="38" y2="48"/></svg>
+      </div>
+      <div class="label">Resume</div>
+      <div class="submenu">
+        <a class="sub-item" data-action="open" data-target="resume-experience">Experience</a>
+        <a class="sub-item" data-action="open" data-target="resume-skills">Technical Skills</a>
+        <a class="sub-item" data-action="download" href="resume.pdf" download>Download PDF</a>
+      </div>
+    </div>
+
+    <div class="menu-item" data-id="projects">
+      <div class="icon">
+        <svg viewBox="0 0 64 64"><polygon points="32,8 56,22 56,46 32,60 8,46 8,22"/><polyline points="8,22 32,36 56,22"/><line x1="32" y1="36" x2="32" y2="60"/></svg>
+      </div>
+      <div class="label">Projects</div>
+      <div class="submenu">
+        <a class="sub-item" data-action="open" data-target="proj-anime">Anime Recommender</a>
+        <a class="sub-item" data-action="open" data-target="proj-engine">Text Game Engine</a>
+      </div>
+    </div>
+
+    <div class="menu-item" data-id="contact">
+      <div class="icon">
+        <svg viewBox="0 0 64 64"><rect x="8" y="14" width="48" height="36" rx="2"/><path d="M8 18l24 18 24-18"/></svg>
+      </div>
+      <div class="label">Contact</div>
+      <div class="submenu">
+        <a class="sub-item" data-action="open" data-target="contact-info">Get in Touch</a>
+        <a class="sub-item" data-action="open" data-target="contact-socials">Socials</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Hint bar -->
+<div class="hint-bar">
+  Use <kbd>←</kbd> <kbd>→</kbd> to navigate · <kbd>Enter</kbd> to select · <kbd>Esc</kbd> to close
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <button class="close-btn" id="close-btn">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+  /* ---------- Content (edit these freely) ---------- */
+  const CONTENT = {
+    'about-bio': {
+      title: 'Bio',
+      html: `
+        <p>Hi — I'm <strong>Joseph Gray</strong>, a software developer based in Florence, Alabama. I build internal tools, integrations, and platforms that help real teams get their work done.</p>
+        <p>Currently at Bank Independent, I work across the stack — Node.js dashboards, C#/.NET platforms, Python automation, SQL reporting — usually focused on turning a messy manual process into something dependable and easy to use.</p>
+        <p>Outside of work I'm usually playing video games, watching anime, fishing, or spending time with my wife.</p>
+      `
+    },
+    'about-education': {
+      title: 'Education',
+      html: `
+        <p><strong>University of North Alabama</strong> — Florence, AL</p>
+        <p>Bachelor of Science in Computer Science<br/>Graduated May 2024</p>
+      `
+    },
+    'about-honors': {
+      title: 'Honors & Awards',
+      html: `
+        <ul>
+          <li>Youth Leadership Shoals Graduate</li>
+          <li>Lads to Leaders National Convention Speech Winner</li>
+        </ul>
+      `
+    },
+    'resume-experience': {
+      title: 'Experience',
+      html: `
+        <p><strong>Software Developer</strong> — Bank Independent, Florence, AL<br/><em>2023 – Present</em></p>
+        <ul>
+          <li>Developed internal and external software applications to improve operational efficiency across multiple departments.</li>
+          <li>Built a Webex API dashboard in Node.js displaying live user activity and call queue metrics for internal monitoring.</li>
+          <li>Built a financial reconciliation tool in Node.js and SQL letting accounting teams reconcile Elavon and Jack Henry records across selectable date ranges, with downloadable reporting tables.</li>
+          <li>Created an email opt-out compliance system in Python with HubSpot integrations that processed user responses and unsubscribed users via the appropriate APIs.</li>
+          <li>Assisted in development of the 'Impaqt' processing platform for Interstate Billing Services, collaborating with the project lead to implement functionality in a custom markup language.</li>
+          <li>Developed a large-scale task management and onboarding platform in C#/.NET used for employee onboarding, offboarding, task scheduling, and call logging.</li>
+          <li>Mentored an incoming software development intern on the onboarding platform and development workflows.</li>
+          <li>Implemented .NET workarounds and fixes for issues involving legacy VB-based scripts and processes.</li>
+        </ul>
+        <p style="margin-top:20px"><strong>Software Development Intern</strong> — Advanced Information Technologies, Florence, AL<br/><em>May 2021 – July 2022</em></p>
+        <ul>
+          <li>Assisted in developing and documenting code changes for customer software projects.</li>
+          <li>Modified HTML and hosted website files for customer-facing web applications.</li>
+          <li>Performed software updates and technical support tasks at customer locations.</li>
+          <li>Configured customer devices and user accounts for deployment.</li>
+        </ul>
+        <p style="margin-top:20px"><strong>Student Worker</strong> — UNA Payroll Department, Florence, AL<br/><em>October 2020 – May 2021</em></p>
+        <ul>
+          <li>Digitized and organized payroll records and provided administrative support.</li>
+        </ul>
+        <a class="resume-action" href="resume.pdf" download>Download Full Resume (PDF)</a>
+      `
+    },
+    'resume-skills': {
+      title: 'Technical Skills',
+      html: `
+        <ul>
+          <li><strong>Languages:</strong> C#, JavaScript, Python, C++, SQL, R</li>
+          <li><strong>Frameworks &amp; Platforms:</strong> .NET / ASP.NET Core Razor Pages, Node.js</li>
+          <li><strong>Databases:</strong> Microsoft SQL Server</li>
+          <li><strong>APIs &amp; Integrations:</strong> REST APIs, Webex APIs, HubSpot Integrations</li>
+          <li><strong>Tooling:</strong> Git, Azure DevOps</li>
+          <li><strong>Workflow:</strong> AI-assisted development (ChatGPT, Claude)</li>
+          <li><strong>Other:</strong> Microsoft Office Suite</li>
+        </ul>
+      `
+    },
+    'proj-anime': {
+      title: 'Anime Recommendation Generator',
+      html: `
+        <p><em>December 2022 · Python</em></p>
+        <p>A Python-based recommendation application that uses quiz-driven filtering algorithms against an anime database to generate personalized recommendations for the user.</p>
+        <ul>
+          <li>Quiz-driven filtering pipeline for narrowing results based on user preferences.</li>
+          <li>Backed by an anime database for matching results to inputs.</li>
+        </ul>
+      `
+    },
+    'proj-engine': {
+      title: 'Text-Based Game Engine',
+      html: `
+        <p><em>December 2021 · C++</em></p>
+        <p>A console-based C++ game engine capable of parsing structured text files to generate interactive text adventures, complete with inventory systems, maps, and gameplay mechanics.</p>
+        <ul>
+          <li>Custom text-file parser for defining rooms, items, and game logic.</li>
+          <li>Inventory management and map navigation built in.</li>
+          <li>Playable game logic driven entirely by data files — write a new adventure without touching the engine.</li>
+        </ul>
+      `
+    },
+    'contact-info': {
+      title: 'Get in Touch',
+      html: `
+        <p>The best way to reach me is email. I'll usually get back to you within a day or two.</p>
+        <div class="contact-grid">
+          <div class="key">Email</div><div><a href="mailto:joseph.gray.works@gmail.com">joseph.gray.works@gmail.com</a></div>
+          <div class="key">Phone</div><div><a href="tel:+12567625232">(256) 762-5232</a></div>
+          <div class="key">Location</div><div>Florence, AL</div>
+        </div>
+      `
+    },
+    'contact-socials': {
+      title: 'Socials',
+      html: `
+        <div class="contact-grid">
+          <div class="key">GitHub</div><div><a href="https://github.com/jgray7-dev" target="_blank" rel="noopener">github.com/jgray7-dev</a></div>
+          <div class="key">LinkedIn</div><div><a href="https://linkedin.com/in/joseph-gray-361964276" target="_blank" rel="noopener">linkedin.com/in/joseph-gray-361964276</a></div>
+        </div>
+      `
+    }
+  };
+
+  /* ---------- Menu navigation ---------- */
+  const items = Array.from(document.querySelectorAll('.menu-item'));
+  let active = 1; // start on Resume — middle item, employer-facing focus
+
+  function setActive(idx) {
+    active = (idx + items.length) % items.length;
+    items.forEach((el, i) => el.classList.toggle('active', i === active));
+  }
+
+  items.forEach((el, i) => {
+    el.addEventListener('mouseenter', () => setActive(i));
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.sub-item')) return;
+      setActive(i);
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('modal-backdrop').classList.contains('open')) {
+      if (e.key === 'Escape') closeModal();
+      return;
+    }
+    if (e.key === 'ArrowRight') setActive(active + 1);
+    if (e.key === 'ArrowLeft')  setActive(active - 1);
+    if (e.key === 'Enter') {
+      const first = items[active].querySelector('.sub-item');
+      if (first) first.click();
+    }
+  });
+
+  /* ---------- Modal ---------- */
+  const backdrop = document.getElementById('modal-backdrop');
+  const modalContent = document.getElementById('modal-content');
+
+  function openModal(targetId) {
+    const data = CONTENT[targetId];
+    if (!data) return;
+    modalContent.innerHTML = `<h2>${data.title}</h2>${data.html}`;
+    backdrop.classList.add('open');
+  }
+  function closeModal() { backdrop.classList.remove('open'); }
+
+  document.querySelectorAll('.sub-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const action = el.dataset.action;
+      if (action === 'open') {
+        e.preventDefault();
+        openModal(el.dataset.target);
+      }
+      // download just lets the anchor work naturally
+    });
+  });
+
+  document.getElementById('close-btn').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
+  /* ---------- Clock ---------- */
+  function tick() {
+    const d = new Date();
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${h}:${m}`;
+  }
+  tick(); setInterval(tick, 30000);
+
+  /* ---------- Particles ---------- */
+  const bg = document.querySelector('.bg');
+  function spawnParticle() {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = '-10px';
+    p.style.animationDuration = (8 + Math.random() * 10) + 's';
+    p.style.opacity = 0.3 + Math.random() * 0.5;
+    bg.appendChild(p);
+    setTimeout(() => p.remove(), 20000);
+  }
+  for (let i = 0; i < 12; i++) setTimeout(spawnParticle, i * 600);
+  setInterval(spawnParticle, 1200);
+
+  /* ---------- Boot ---------- */
+  window.addEventListener('load', () => {
+    setActive(active); // initialize
+    setTimeout(() => document.getElementById('boot').classList.add('done'), 200);
+  });
+</script>
+</body>
+</html>
