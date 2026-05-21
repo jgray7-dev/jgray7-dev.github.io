@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0a1a3a" />
@@ -495,37 +495,65 @@
       transform: translateY(-6px) scale(1.12);
     }
 
-    /* Submenu sits in its own zone in the lower-middle of screen.
-       Uses dvh so it adjusts when the mobile browser toolbar shows/hides. */
+    /* Hide the inline submenus on mobile — we render them in the portal instead */
     .submenu {
-      position: fixed;
-      top: 48%;
-      top: 48dvh;
-      bottom: auto;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 0;
-      width: calc(100% - 40px);
-      max-width: 320px;
-      align-items: stretch;
-      flex-direction: column;
-      gap: 10px;
+      display: none;
     }
 
-    .sub-item {
+    /* Portal: a dedicated, always-visible spot below the icon row for submenu links */
+    .submenu-portal {
+      display: flex;
+      position: fixed;
+      top: 50%;
+      top: 50dvh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 320px;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+    .submenu-portal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .submenu-portal .sub-item {
       padding: 14px 20px;
       font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
       text-align: center;
       background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-      border-left: none;
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 4px;
-      min-height: 44px; /* touch-friendly target */
+      min-height: 44px;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s ease;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: portalSlide 0.35s forwards;
     }
-    .sub-item:hover, .sub-item:active {
-      padding-left: 20px; /* override desktop hover slide */
+    .submenu-portal .sub-item:nth-child(1) { animation-delay: 0.05s; }
+    .submenu-portal .sub-item:nth-child(2) { animation-delay: 0.12s; }
+    .submenu-portal .sub-item:nth-child(3) { animation-delay: 0.19s; }
+    .submenu-portal .sub-item:nth-child(4) { animation-delay: 0.26s; }
+
+    @keyframes portalSlide {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .submenu-portal .sub-item:active {
       background: linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08));
       border-color: rgba(255,255,255,0.6);
+      color: #fff;
     }
 
     /* Top bar — respect notch safe area */
@@ -616,6 +644,11 @@
 
   /* Default: assume mouse, show keyboard hint */
   .hint-bar .mobile-hint { display: none; }
+
+  /* Portal is mobile-only — hidden on desktop only (scoped so it doesn't override mobile rules) */
+  @media (min-width: 769px) {
+    .submenu-portal { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -689,6 +722,9 @@
 
   </div>
 </nav>
+
+<!-- Submenu portal — used on mobile to render the active submenu outside the scroll container -->
+<div class="submenu-portal" id="submenu-portal" aria-hidden="true"></div>
 
 <!-- Hint bar -->
 <div class="hint-bar">
@@ -822,14 +858,41 @@
   /* ---------- Menu navigation ---------- */
   const items = Array.from(document.querySelectorAll('.menu-item'));
   const menuRow = document.querySelector('.menu-row');
+  const portal = document.getElementById('submenu-portal');
   const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
   let active = 1; // start on Resume — middle-ish item, employer-facing focus
+
+  function populatePortal(idx) {
+    // Clone the active item's submenu links into the portal so they render
+    // outside the scrollable menu-row (where they'd otherwise be clipped/hidden)
+    portal.innerHTML = '';
+    const source = items[idx].querySelector('.submenu');
+    if (!source) return;
+    Array.from(source.children).forEach((link) => {
+      const clone = link.cloneNode(true);
+      // Re-wire click handlers for clones
+      clone.addEventListener('click', (e) => {
+        const action = clone.dataset.action;
+        if (action === 'open') {
+          e.preventDefault();
+          openModal(clone.dataset.target);
+        }
+      });
+      portal.appendChild(clone);
+    });
+    portal.classList.add('visible');
+  }
 
   function setActive(idx, scroll = true) {
     active = (idx + items.length) % items.length;
     items.forEach((el, i) => el.classList.toggle('active', i === active));
-    if (scroll && isMobile()) {
-      items[active].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (isMobile()) {
+      populatePortal(active);
+      if (scroll) {
+        items[active].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    } else {
+      portal.classList.remove('visible');
     }
   }
 
@@ -936,6 +999,13 @@
       });
     }
     setTimeout(() => document.getElementById('boot').classList.add('done'), 200);
+  });
+
+  // Handle viewport changes (rotate phone, resize browser)
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => setActive(active, false), 150);
   });
 </script>
 </body>
