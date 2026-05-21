@@ -442,11 +442,19 @@
 
   /* ---------- Mobile ---------- */
   @media (max-width: 768px) {
+    /* Use dvh (dynamic viewport height) so we account for mobile browser chrome.
+       Falls back to vh / % on older browsers. */
+    html, body {
+      height: 100vh;
+      height: 100dvh;
+    }
+
     /* Move icon row up to the top third so submenu has dedicated space below */
     .menu {
       width: 100%;
       left: 0;
-      top: 26%;
+      top: 24%;
+      top: 24dvh;
       transform: translateY(-50%);
       padding: 0 20px;
     }
@@ -487,10 +495,12 @@
       transform: translateY(-6px) scale(1.12);
     }
 
-    /* Submenu sits in its own zone in the lower-middle of screen */
+    /* Submenu sits in its own zone in the lower-middle of screen.
+       Uses dvh so it adjusts when the mobile browser toolbar shows/hides. */
     .submenu {
       position: fixed;
-      top: 53%;
+      top: 48%;
+      top: 48dvh;
       bottom: auto;
       left: 50%;
       transform: translateX(-50%);
@@ -518,18 +528,21 @@
       border-color: rgba(255,255,255,0.6);
     }
 
-    /* Top bar */
+    /* Top bar — respect notch safe area */
     .topbar {
       padding: 14px 18px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-left: max(18px, env(safe-area-inset-left));
+      padding-right: max(18px, env(safe-area-inset-right));
       font-size: 10px;
       letter-spacing: 0.12em;
     }
 
-    /* Replace keyboard hint with touch hint */
+    /* Replace keyboard hint with touch hint — respect home indicator area */
     .hint-bar {
       font-size: 9px;
       letter-spacing: 0.2em;
-      bottom: 16px;
+      bottom: max(16px, env(safe-area-inset-bottom));
     }
     .hint-bar .desktop-hint { display: none; }
     .hint-bar .mobile-hint { display: inline; }
@@ -542,7 +555,9 @@
     .modal {
       max-width: 100%;
       max-height: 92vh;
+      max-height: 92dvh;
       padding: 32px 24px 40px;
+      padding-bottom: max(40px, env(safe-area-inset-bottom));
       border-radius: 16px 16px 0 0;
       border-bottom: none;
       transform: translateY(100%);
@@ -592,8 +607,8 @@
 
   /* Short screens (landscape phones) */
   @media (max-width: 768px) and (max-height: 600px) {
-    .menu { top: 22%; }
-    .submenu { top: 48%; }
+    .menu { top: 22%; top: 22dvh; }
+    .submenu { top: 46%; top: 46dvh; }
     .icon { width: 70px; height: 70px; }
     .icon svg { width: 36px; height: 36px; }
     .menu-item .label { margin-top: 10px; font-size: 11px; }
